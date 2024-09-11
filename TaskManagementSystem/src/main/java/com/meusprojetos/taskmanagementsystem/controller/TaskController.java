@@ -4,6 +4,7 @@ import com.meusprojetos.taskmanagementsystem.model.Task;
 import com.meusprojetos.taskmanagementsystem.model.User;
 import com.meusprojetos.taskmanagementsystem.repository.TaskRepository;
 import com.meusprojetos.taskmanagementsystem.repository.UserRepository;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -27,7 +28,7 @@ public class TaskController {
 
     // Criar nova tarefa
     @PostMapping
-    public ResponseEntity<Task> creatTask(@RequestBody Task task){
+    public ResponseEntity<?> creatTask(@Valid @RequestBody Task task){
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();
         Optional<User> user = userRepository.findByUsername(username);
@@ -37,7 +38,7 @@ public class TaskController {
             Task savedTask = taskRepository.save(task);
             return new ResponseEntity<>(savedTask, HttpStatus.CREATED);
         }else {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>("Usuario não encontrado.", HttpStatus.UNAUTHORIZED);
         }
     }
 

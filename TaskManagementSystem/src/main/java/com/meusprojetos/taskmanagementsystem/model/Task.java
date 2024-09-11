@@ -1,6 +1,7 @@
 package com.meusprojetos.taskmanagementsystem.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 
 import java.time.LocalDateTime;
 
@@ -11,7 +12,9 @@ public class Task {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "A descrição da tarefa é obrigatoria.")
     private String description;
+
     private boolean completed;
     private LocalDateTime createdAt;
 
