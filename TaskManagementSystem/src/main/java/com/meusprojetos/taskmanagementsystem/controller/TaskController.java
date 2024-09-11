@@ -26,6 +26,20 @@ public class TaskController {
         this.userRepository = userRepository;
     }
 
+    @GetMapping("/status")
+    public ResponseEntity<List<Task>> getTaskByStatus(@RequestParam boolean completed) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+        Optional<User> user = userRepository.findByUsername(username);
+
+        if (user.isPresent()) {
+            List<Task> tasks = taskRepository.findByUserAndCompleted(user.get(), completed);
+            return new ResponseEntity<>(tasks, HttpStatus.OK);
+        }else {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+    }
+
     // Criar nova tarefa
     @PostMapping
     public ResponseEntity<?> creatTask(@Valid @RequestBody Task task){
