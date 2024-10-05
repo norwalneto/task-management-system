@@ -8,6 +8,10 @@ import java.time.LocalDateTime;
 @Entity
 public class Task {
 
+    public enum Priority {
+        ALTA, MEDIA, BAIXA
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -17,6 +21,9 @@ public class Task {
 
     private boolean completed;
     private LocalDateTime createdAt;
+
+    @Enumerated(EnumType.STRING)
+    private Priority priority;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
@@ -68,5 +75,13 @@ public class Task {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public Priority getPriority() {
+        return priority;
+    }
+
+    public void setPriority(Priority priority) {
+        this.priority = priority;
     }
 }

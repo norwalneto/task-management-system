@@ -4,6 +4,7 @@ import com.meusprojetos.taskmanagementsystem.model.Task;
 import com.meusprojetos.taskmanagementsystem.model.User;
 import com.meusprojetos.taskmanagementsystem.repository.TaskRepository;
 import com.meusprojetos.taskmanagementsystem.repository.UserRepository;
+import com.meusprojetos.taskmanagementsystem.service.EmailService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,10 +21,12 @@ public class TaskController {
 
     private final TaskRepository taskRepository;
     private final UserRepository userRepository;
+    private final EmailService emailService;
 
-    public TaskController(TaskRepository taskRepository, UserRepository userRepository) {
+    public TaskController(TaskRepository taskRepository, UserRepository userRepository, EmailService emailService) {
         this.taskRepository = taskRepository;
         this.userRepository = userRepository;
+        this.emailService = emailService;
     }
 
     @GetMapping("/status")
@@ -50,6 +53,11 @@ public class TaskController {
         if (user.isPresent()) {
             task.setUser(user.get());
             Task savedTask = taskRepository.save(task);
+
+            // Envia notificação por e-mail
+            emailService.sendTaskNotification(user.get().getUsername(), "Nova Tarefa Criada",
+                    "Sua nova tarefa '" + task.getDescription() + "' foi criada com sucesso!");
+
             return new ResponseEntity<>(savedTask, HttpStatus.CREATED);
         }else {
             return new ResponseEntity<>("Usuario não encontrado.", HttpStatus.UNAUTHORIZED);
@@ -125,6 +133,21 @@ public class TaskController {
             }else {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
+        }else {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+    }
+
+    //Buscar Tarefa por Prioridade
+    @GetMapping("/priority")
+    public ResponseEntity<List<Task>> getTasksByPriority(@RequestParam Task.Priority priority) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+        Optional<User> user = userRepository.findByUsername(username);
+
+        if (user.isPresent()) {
+            List<Task> tasks = taskRepository.findByUserAndPriority(user.get(), priority);
+            return new ResponseEntity<>(tasks, HttpStatus.OK);
         }else {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
