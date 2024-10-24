@@ -21,6 +21,7 @@ public class Task {
 
     private boolean completed;
     private LocalDateTime createdAt;
+    private LocalDateTime completedAt;
 
     @Enumerated(EnumType.STRING)
     private Priority priority;
@@ -59,6 +60,9 @@ public class Task {
 
     public void setCompleted(boolean completed) {
         this.completed = completed;
+        if (completed) {
+            this.completedAt = LocalDateTime.now();
+        }
     }
 
     public LocalDateTime getCreatedAt() {
@@ -83,5 +87,13 @@ public class Task {
 
     public void setPriority(Priority priority) {
         this.priority = priority;
+    }
+
+    public LocalDateTime getCompletedAt() {
+        return completedAt;
+    }
+
+    public void setCompletedAt(LocalDateTime completedAt) {
+        this.completedAt = completedAt;
     }
 }

@@ -4,6 +4,7 @@ import com.meusprojetos.taskmanagementsystem.model.Task;
 import com.meusprojetos.taskmanagementsystem.model.User;
 import com.meusprojetos.taskmanagementsystem.repository.TaskRepository;
 import com.meusprojetos.taskmanagementsystem.repository.UserRepository;
+import com.meusprojetos.taskmanagementsystem.service.AuditService;
 import com.meusprojetos.taskmanagementsystem.service.EmailService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -22,11 +23,13 @@ public class TaskController {
     private final TaskRepository taskRepository;
     private final UserRepository userRepository;
     private final EmailService emailService;
+    private final AuditService auditService;
 
-    public TaskController(TaskRepository taskRepository, UserRepository userRepository, EmailService emailService) {
+    public TaskController(TaskRepository taskRepository, UserRepository userRepository, EmailService emailService, AuditService auditService) {
         this.taskRepository = taskRepository;
         this.userRepository = userRepository;
         this.emailService = emailService;
+        this.auditService = auditService;
     }
 
     @GetMapping("/status")
@@ -57,6 +60,9 @@ public class TaskController {
             // Envia notificação por e-mail
             emailService.sendTaskNotification(user.get().getUsername(), "Nova Tarefa Criada",
                     "Sua nova tarefa '" + task.getDescription() + "' foi criada com sucesso!");
+
+            // Registrar auditoria
+            auditService.logAction("Criou uma nova tarefa: " + task.getDescription());
 
             return new ResponseEntity<>(savedTask, HttpStatus.CREATED);
         }else {
